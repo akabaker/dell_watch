@@ -1,5 +1,6 @@
 from elementtree import ElementTree
 from urllib2 import urlopen, URLError, HTTPError
+import os
 import re
 import yaml
 
@@ -56,22 +57,31 @@ class ParseOmsa:
 				val = key[-1].split('/')
 				self.percs[' '.join(key[-4:-1])] = val[-1]
 	
-	def write_yaml(self):
+	def write_yaml(self, output_dir):
 		"""Write YAML file, containing bios version, model, and perc firmware version	
-		
+	
+		@param output_dir: The output directory of the yaml files
 		Output is a YAML file, named (self.model).yaml
 			
 		"""
-		data = {'model': self.model,
-			'bios': self.bios,
-			'percs': self.percs}
-		
-		try :
-			f = open("%s.yaml" % (self.model), "w")
-		except Exception, e:
-			print "Oops, problem %s" % (e)
-			return
+		dir = os.path.dirname(output_dir)
+		file = "%s.yaml" % (self.model)
+		file = os.path.join(dir, file)
 
-		yaml_data = yaml.dump(data, default_flow_style=False)
-		f.write(yaml_data)
-		f.close()
+		if os.path.exists(dir):
+			data = {'model': self.model,
+				'bios': self.bios,
+				'percs': self.percs}
+			
+			try :
+				f = open(file, "w")
+			except Exception, e:
+				print "Exception: %s" % (e)
+				return
+
+			yaml_data = yaml.dump(data, default_flow_style=False)
+			f.write(yaml_data)
+			f.close()
+
+		else:
+			print 'Path does not exist'
